@@ -1,0 +1,9 @@
+{
+    "lib": {
+        "www": {
+            "id": "com.claw-studio.mobile",
+            "version": "0.0.1",
+            "uri": "https://github.com/vala/claw-mobile/archive/0.0.1.tar.gz"
+        }
+    }
+}

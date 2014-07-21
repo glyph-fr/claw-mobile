@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="msapplication-tap-highlight" content="no" />
+    <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height, target-densitydpi=device-dpi" />
+    <link rel="stylesheet" type="text/css" href="css/vendor/bootstrap.css" />
+    <link rel="stylesheet" type="text/css" href="css/vendor/bootstrap-theme.css" />
+    <link rel="stylesheet" type="text/css" href="css/app.css" />
+    <title>Claw Mobile</title>
+  </head>
+  <body>
+
+    <script type="text/x-handlebars">
+      <div class="container main-container">
+        {{outlet}}
+      </div>
+    </script>
+
+    <script type="text/x-handlebars" data-template-name="index">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h3 class="panel-title">
+            Connectez-vous
+          </h3>
+        </div>
+
+        <div class="panel-body">
+          <form class="form-horizontal">
+            <div class="form-group">
+              <label class="control-label col-md-3" for="user_email">
+                E-mail
+              </label>
+              <div class="form-controls col-md-9">
+                {{input type="text" value=email placeholder="Entrez votre e-mail" class="form-control"}}
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="control-label col-md-3" for="user_email">
+                Mot de passe
+              </label>
+              <div class="form-controls col-md-9">
+                {{input type="password" value=password placeholder="Entrez votre mot de passe" class="form-control"}}
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <div class="panel-footer">
+          <button type="submit" class="btn btn-primary" {{action signIn}}>
+            Me connecter
+          </button>
+        </div>
+      </div>
+    </script>
+
+    <script type="text/x-handlebars" data-template-name="projects/index">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h3 class="panel-title">
+            Projets
+          </h3>
+        </div>
+
+        <div class="list-group">
+          {{#each project in controller}}
+            <div class="list-group-item row row-link">
+              {{#link-to 'projects.show' project}}
+                {{#with project}}
+                  <div class="col-xs-10 col-sm-11">
+                    <div class="row">
+                      <div class="title col-xs-6 col-md-4">
+                        {{name}}
+                      </div>
+                      <div class="bpm col-xs-6 col-md-4">
+                        {{bpm}} BPM
+                      </div>
+                      <div class="tracks col-xs-6 col-md-4">
+                        <i class="glyphicon glyphicon-user"></i>
+                        {{tracks_count}} Pistes
+                      </div>
+                      <div class="tracks col-xs-6 col-md-4">
+                        <i class="glyphicon glyphicon-user"></i>
+                        {{collaborators.length}} Collaborateurs
+                      </div>
+                      <div class="tracks col-xs-6 col-md-4">
+                        <i class="glyphicon glyphicon-comment"></i>
+                        {{discussions_count}} Discussions
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-xs-2 col-sm-1">
+                    <i class="glyphicon glyphicon-chevron-right"></i>
+                  </div>
+                </div>
+              {{/with}}
+            {{/link-to}}
+          {{else}}
+            {{#if isLoading}}
+              <div class="list-group-item">
+                Chargement en cours ...
+              </div>
+            {{else}}
+              <div class="list-group-item">
+                Aucun projet pour le moment ...
+              </div>
+            {{/if}}
+          {{/each}}
+        </div>
+      </div>
+    </script>
+
+    <script type='text/x-handlebars' data-template-name='projects/show'>
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h3 class="panel-title">
+            {{name}}
+          </h3>
+        </div>
+
+        <div class="panel-body">
+          <div class="tracks">
+            {{audio_sources.length}} Sources
+            <ul class="list-group">
+              {{#each audio_source in audio_sources}}
+                <li class="list-group-item">
+                  {{audio_source.name}}
+                  {{#link-to 'audio_sources.show' audio_source class="btn btn-primary pull-right"}}
+                    <i class="glyphicon glyphicon-play"></i>
+                    Écouter
+                  {{/link-to}}
+                </li>
+              {{/each}}
+            </ul>
+          </div>
+        </div>
+      </div>
+    </script>
+
+    <script type='text/x-handlebars' data-template-name='audio_sources/show'>
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h3 class="panel-title">
+            {{name}}
+          </h3>
+        </div>
+
+        <div class="panel-body">
+          <audio controls="controls" autoplay>
+            <source {{bind-attr src="url"}} {{bind-attr type="type"}}>
+          </audio>
+        </div>
+      </div>
+    </script>
+
+    <script type="text/javascript" src="cordova.js"></script>
+    <script type="text/javascript" src="js/vendor/jquery-1.10.2.js"></script>
+    <script type="text/javascript" src="js/vendor/handlebars-1.1.2.js"></script>
+    <script type="text/javascript" src="js/vendor/ember-1.6.1.js"></script>
+    <script type="text/javascript" src="js/app/app.js"></script>
+  </body>
+</html>

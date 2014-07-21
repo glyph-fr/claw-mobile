@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="msapplication-tap-highlight" content="no" />
+    <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height, target-densitydpi=device-dpi" />
+    <link rel="stylesheet" type="text/css" href="css/vendor/bootstrap.css" />
+    <!-- <link rel="stylesheet" type="text/css" href="css/vendor/bootstrap-theme.css" /> -->
+    <link rel="stylesheet" type="text/css" href="css/app.css" />
+    <title>Claw Mobile</title>
+  </head>
+  <body>
+
+    <script type="text/x-handlebars">
+      <header class="navbar navbar-fixed-top navbar-default" id="top" role="banner">
+        <div class="container">
+          <nav class="main-nav" role="navigation">
+            <ul class="nav navbar-nav col-xs-3">
+              <li>
+                <a href="javascript:history.back()" class="btn btn-default btn-xs">
+                  <i class="glyphicon glyphicon-chevron-left"></i>
+                  Retour
+                  </i>
+                </a>
+              </li>
+            </ul>
+            <div class="navbar-header col-xs-6">
+              <a href="../" class="navbar-brand">Claw Studio</a>
+            </div>
+            <ul class="nav navbar-nav navbar-right col-xs-3">
+              <li>
+                {{log controller.currentModel}}
+                <img {{bind-attr src="controller.currentModel.avatar_urls.small"}}>
+                {{controller.currentModel.name}}
+              </li>
+            </ul>
+          </nav>
+        </div>
+      </header>
+
+      <div class="container main-container">
+        {{outlet}}
+      </div>
+    </script>
+
+    <script type="text/x-handlebars" data-template-name="index">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h3 class="panel-title">
+            Connectez-vous
+          </h3>
+        </div>
+
+        <div class="panel-body">
+          {{#if auth_token}}
+            {{#link-to 'projects' class="btn btn-primary btn-lg"}}
+              Accéder aux projets
+            {{/link-to}}
+          {{else}}
+            <form class="form-horizontal">
+              <div class="form-group">
+                <label class="control-label col-md-3" for="user_email">
+                  E-mail
+                </label>
+                <div class="form-controls col-md-9">
+                  {{input type="text" value=email placeholder="Entrez votre e-mail" class="form-control"}}
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="control-label col-md-3" for="user_email">
+                  Mot de passe
+                </label>
+                <div class="form-controls col-md-9">
+                  {{input type="password" value=password placeholder="Entrez votre mot de passe" class="form-control"}}
+                </div>
+              </div>
+            </form>
+          {{/if}}
+        </div>
+
+        <div class="panel-footer">
+          <button type="submit" class="btn btn-primary" {{action signIn}}>
+            Me connecter
+          </button>
+        </div>
+      </div>
+    </script>
+
+    <script type="text/x-handlebars" data-template-name="projects/index">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h3 class="panel-title">
+            Projets
+          </h3>
+        </div>
+
+        <div class="list-group">
+          {{#each project in controller}}
+            <div class="list-group-item row-link">
+              <div class="row">
+                {{#link-to 'projects.show' project}}
+                  {{#with project}}
+                    <div class="col-xs-10 col-sm-11">
+                      <div class="row">
+                        <div class="title col-xs-6 col-md-4">
+                          {{name}}
+                        </div>
+                        <div class="bpm col-xs-6 col-md-4">
+                          {{bpm}} BPM
+                        </div>
+                        <div class="tracks col-xs-6 col-md-4">
+                          <i class="glyphicon glyphicon-tasks"></i>
+                          {{tracks_count}} Pistes
+                        </div>
+                        <div class="tracks col-xs-6 col-md-4">
+                          <i class="glyphicon glyphicon-user"></i>
+                          {{collaborators.length}} Collaborateurs
+                        </div>
+                        <div class="tracks col-xs-6 col-md-4">
+                          <i class="glyphicon glyphicon-comment"></i>
+                          {{discussions_count}} Discussions
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-xs-2 col-sm-1">
+                      <i class="glyphicon glyphicon-chevron-right"></i>
+                    </div>
+                  </div>
+                {{/with}}
+              {{/link-to}}
+            </div>
+          {{else}}
+            {{#if isLoading}}
+              <div class="list-group-item">
+                Chargement en cours ...
+              </div>
+            {{else}}
+              <div class="list-group-item">
+                Aucun projet pour le moment ...
+              </div>
+            {{/if}}
+          {{/each}}
+        </div>
+      </div>
+    </script>
+
+    <script type='text/x-handlebars' data-template-name='projects/show'>
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h3 class="panel-title">
+            {{name}}
+          </h3>
+        </div>
+
+        <div class="panel-body">
+          <h4>
+            <i class="glyphicon glyphicon-file"></i>
+            {{audio_sources.length}} Sources
+          </h4>
+        </div>
+
+        <ul class="list-group">
+          {{#each audio_source in audio_sources}}
+            <li class="list-group-item">
+              {{audio_source.name}}
+              {{#link-to 'audio_sources.show' audio_source class="btn btn-primary btn-xs pull-right"}}
+                <i class="glyphicon glyphicon-play"></i>
+                Écouter
+              {{/link-to}}
+            </li>
+          {{/each}}
+        </ul>
+
+        <div class="panel-body">
+          <h4>
+            <i class="glyphicon glyphicon-comment"></i>
+            {{discussions_count}} Discussions
+          </h4>
+        </div>
+
+        <ul class="list-group">
+          {{#each discussion in discussions itemController="discussion"}}
+            <li class="list-group-item discussion-item">
+              <div class="author">
+                <img {{bind-attr src=discussion.author.avatar_urls.small}}>
+                {{discussion.author.name}}
+              </div>
+              <div class="date">
+                {{discussion.createdAtString}}
+              </div>
+              <div class="content">
+                {{discussion.content.content}}
+              </div>
+            </li>
+            {{#each comment in discussion.comments itemController="discussion"}}
+              <li class="list-group-item comment-item">
+                <div class="author">
+                  <img {{bind-attr src=comment.author.avatar_urls.small}}>
+                  {{comment.author.name}}
+                </div>
+                <div class="date">
+                  {{comment.createdAtString}}
+                </div>
+                <div class="content">
+                  {{comment.content.content}}
+                </div>
+              </li>
+            {{/each}}
+          {{/each}}
+        </ul>
+      </div>
+    </script>
+
+    <script type='text/x-handlebars' data-template-name='audio_sources/show'>
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h3 class="panel-title">
+            {{name}}
+          </h3>
+        </div>
+
+        <div class="panel-body">
+          <audio controls="controls" autoplay>
+            <source {{bind-attr src="url"}} {{bind-attr type="type"}}>
+          </audio>
+        </div>
+      </div>
+    </script>
+
+    <script type="text/javascript" src="cordova.js"></script>
+    <script type="text/javascript" src="js/vendor/jquery-1.10.2.js"></script>
+    <script type="text/javascript" src="js/vendor/handlebars-1.1.2.js"></script>
+    <script type="text/javascript" src="js/vendor/ember-1.6.1.js"></script>
+    <script type="text/javascript" src="js/app/app.js"></script>
+  </body>
+</html>

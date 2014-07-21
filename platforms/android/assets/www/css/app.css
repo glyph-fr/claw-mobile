@@ -1,0 +1,7 @@
+.row-link a {
+  color: inherit;
+}
+
+.row-link:hover {
+  background: whitesmoke;
+}
