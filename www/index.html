@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="format-detection" content="telephone=no" />
     <meta name="msapplication-tap-highlight" content="no" />
-    <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height, target-densitydpi=device-dpi" />
+    <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height, target-densitydpi=medium-dpi" />
     <link rel="stylesheet" type="text/css" href="css/vendor/bootstrap.css" />
     <!-- <link rel="stylesheet" type="text/css" href="css/vendor/bootstrap-theme.css" /> -->
     <link rel="stylesheet" type="text/css" href="css/app.css" />
@@ -28,13 +28,25 @@
             <div class="navbar-header col-xs-6">
               <a href="../" class="navbar-brand">Claw Studio</a>
             </div>
-            <ul class="nav navbar-nav navbar-right col-xs-3">
-              <li>
-                {{log controller.currentModel}}
-                <img {{bind-attr src="controller.currentModel.avatar_urls.small"}}>
-                {{controller.currentModel.name}}
-              </li>
-            </ul>
+            {{#if currentUser.isSignedIn}}
+              <ul class="nav navbar-nav navbar-right col-xs-3">
+                <li class="user-signed-in-menu">
+                  <div class="dropdown">
+                    <a data-toggle="dropdown" href="#">
+                      <img {{bind-attr src="currentUser.avatar_urls.medium"}} class="avatar">
+                    </a>
+                    <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
+                      <li>
+                        <a href="#" {{action signOut}}>
+                          <i class="glyphicon glyphicon-off"></i>
+                          Se Déconnecter
+                        </a>
+                      </li>
+                    </ul>
+                  </div>
+                </li>
+              </ul>
+            {{/if}}
           </nav>
         </div>
       </header>
@@ -162,13 +174,22 @@
         </div>
 
         <ul class="list-group">
-          {{#each audio_source in audio_sources}}
+          {{#each audio_source in audio_sources itemController="audioSource"}}
             <li class="list-group-item">
-              {{audio_source.name}}
-              {{#link-to 'audio_sources.show' audio_source class="btn btn-primary btn-xs pull-right"}}
-                <i class="glyphicon glyphicon-play"></i>
-                Écouter
-              {{/link-to}}
+              <div class="audio-source-header">
+                {{audio_source.name}}
+                <button class="btn btn-primary btn-xs pull-right" {{action play}}>
+                  <i class="glyphicon glyphicon-play"></i>
+                  Écouter
+                </button>
+              </div>
+              <div class="audio-source-waveform">
+                {{#if audio_source.waveform_url}}
+                  <img {{bind-attr src=audio_source.waveform_url}} height="40" width="100%">
+                {{else}}
+                  Pas de forme d'onde pour le moment ...
+                {{/if}}
+              </div>
             </li>
           {{/each}}
         </ul>
@@ -222,17 +243,17 @@
         </div>
 
         <div class="panel-body">
-          <audio controls="controls" autoplay>
-            <source {{bind-attr src="url"}} {{bind-attr type="type"}}>
-          </audio>
+          <audio controls autoplay {{bind-attr src="url"}} {{bind-attr type="type"}}></audio>
         </div>
       </div>
     </script>
 
     <script type="text/javascript" src="cordova.js"></script>
     <script type="text/javascript" src="js/vendor/jquery-1.10.2.js"></script>
+    <script type="text/javascript" src="js/vendor/bootstrap.js"></script>
     <script type="text/javascript" src="js/vendor/handlebars-1.1.2.js"></script>
     <script type="text/javascript" src="js/vendor/ember-1.6.1.js"></script>
+    <script type="text/javascript" src="js/vendor/soundmanager2.js"></script>
     <script type="text/javascript" src="js/app/app.js"></script>
   </body>
 </html>

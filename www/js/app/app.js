@@ -6,8 +6,8 @@ $.requestBackend = function(path, options) {
   if(!options) options = {};
 
   return $.ajax({
-    // url: 'http://localhost:3000' + path,
-    url: 'http://backend.claw-studio.com' + path,
+    url: 'http://localhost:3000' + path,
+    // url: 'http://backend.claw-studio.com' + path,
     dataType: 'json',
     type: options.type || 'get',
     data: $.extend({ auth_token: currentUser.auth_token }, options.data),
@@ -16,6 +16,35 @@ $.requestBackend = function(path, options) {
     }
   });
 }
+
+
+Ember.Application.initializer({
+  name: 'currentUser',
+
+  initialize: function(container) {
+    container.register('currentUser:main', currentUser, { instantiate: false });
+    container.typeInjection('controller', 'currentUser', 'currentUser:main');
+    container.typeInjection('route', 'currentUser', 'currentUser:main');
+    container.typeInjection('helper', 'currentUser', 'currentUser:main');
+  }
+});
+
+Ember.Object.reopen({
+  clearProperties: function() {
+    for(var key in this) {
+      if(this.hasOwnProperty(key) && typeof this.get(key) !== 'function') {
+        this.set(key, null);
+      }
+    }
+  }
+});
+
+Ember.Route.reopen({
+  activate: function() {
+    this._super();
+    window.scrollTo(0,0);
+  }
+});
 
 /***********************
  *
@@ -43,8 +72,7 @@ App.IndexRoute = Ember.Route.extend({
   model: function() { return currentUser; },
 
   setupController: function(controller, model) {
-    if (currentUser.loadFromLocalStorage())
-      this.transitionTo('projects');
+    if (this.get('currentUser.isSignedIn')) this.transitionTo('projects');
 
     this._super(controller, model);
   }
@@ -52,11 +80,10 @@ App.IndexRoute = Ember.Route.extend({
 
 App.AuthenticatedRoute = Ember.Route.extend({
   beforeModel: function() {
-    console.log('AuthenticatedRoute', currentUser.get('auth_token'), currentUser.loadFromLocalStorage())
-
-    if(!currentUser.get('auth_token') && !currentUser.loadFromLocalStorage())
+    if(!this.get('currentUser.isSignedIn')) {
       this.transitionToRoute('index');
       return false;
+    }
   }
 })
 
@@ -128,6 +155,15 @@ App.ProjectsShowRoute = App.AuthenticatedRoute.extend({
  *
  **********************/
 
+App.ApplicationController = Ember.ObjectController.extend({
+  actions: {
+    signOut: function() {
+      this.get('currentUser').signOut();
+      this.transitionToRoute('index');
+    }
+  }
+});
+
 App.IndexController = Ember.ObjectController.extend({
   actions: {
     signIn: function() {
@@ -159,6 +195,35 @@ App.IndexController = Ember.ObjectController.extend({
 
 });
 
+App.AudioSourceController = Ember.ObjectController.extend({
+  actions: {
+    play: function() {
+      var self = this;
+
+      var sound = soundManager.createSound({
+       // optional id, for getSoundById() look-ups etc. If omitted, an id will be generated.
+       id: 'audio-source-file-' + this.get('id'),
+       url: this.get('url'),
+       // optional sound parameters here, see Sound Properties for full list
+       volume: 50,
+       autoPlay: true,
+       whileloading: $.proxy(this.loadingFile, this),
+       whileplaying: $.proxy(this.playing, this)
+      });
+
+      this.set('sound', sound);
+    }
+  },
+
+  loadingFile: function() {
+    console.log(this.id + ' is loading', this.get('sound.bytesLoaded'), this.get('sound.bytesTotal'));
+  },
+
+  playing: function() {
+
+  }
+});
+
 App.DiscussionController = Ember.ObjectController.extend({
   currentUser: function() {
     return window.currentUser;
@@ -173,7 +238,6 @@ App.DiscussionController = Ember.ObjectController.extend({
 
     if (typeof value === 'string') {
         a = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})([+-])(\d{2,}):(\d{2,})?$/.exec(value);
-        console.log(value, a)
     }
 
     return a[3] + "/" + a[2] + "/" + a[1] + " - " + a[4] + ":" + a[5];
@@ -191,11 +255,21 @@ App.User = Ember.Object.extend({
   projects: Ember.A(),
   contacts: Ember.Object.create(),
 
-  loadFromLocalStorage: function() {
-    var userData;
+  isSignedIn: function() {
+    return this.get('auth_token');
+  }.property('auth_token'),
 
-    if(userData = localStorage.getItem('clawCurrentUser'))
-      return currentUser.setProperties(JSON.parse(userData));
+  signInFromLocalStorage: function() {
+    var userData = localStorage.getItem('clawCurrentUser');
+
+    if(userData) {
+      this.setProperties(JSON.parse(userData));
+    }
+  },
+
+  signOut: function() {
+    this.clearProperties();
+    localStorage.removeItem('clawCurrentUser');
   },
 
   getContact: function(authorId) {
@@ -224,7 +298,6 @@ App.User = Ember.Object.extend({
       contactsData.forEach(function(contactData) {
         var contact = self.get('contacts.' + contactData.id);
 
-        console.log('Contact ?', contact)
         if(!contact) {
           contact = App.Contact.create();
           self.set('contacts.' + contactData.id, contact);
@@ -237,8 +310,18 @@ App.User = Ember.Object.extend({
   }
 });
 currentUser = App.User.create();
+currentUser.signInFromLocalStorage();
 
 App.Project = Ember.Object.extend({});
 
 App.Contact = Ember.Object.extend({});
 
+/***********************
+ *
+ *       Views
+ *
+ **********************/
+
+Ember.View.reopen({
+  touchStart: Ember.aliasMethod('click')
+});

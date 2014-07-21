@@ -1,7 +1,52 @@
+body {
+  padding-top: 70px;
+}
+
 .row-link a {
   color: inherit;
 }
 
 .row-link:hover {
   background: whitesmoke;
+}
+
+.main-nav a.btn {
+  height: 35px;
+  line-height: 0px;
+  padding: 10px;
+  margin-top: 7px;
+}
+
+.navbar-header .navbar-brand {
+  display: block;
+  text-align: center;
+  margin-left: 0;
+  float: none;
+}
+
+.list-group-item.discussion-item {
+  background-color: #f8fbf6;
+  font-weight: bold;
+}
+
+.list-group-item.discussion-item .date,
+.list-group-item.comment-item .date {
+  float: right;
+  font-weight: nomal;
+  font-size: 0.7em;
+}
+
+.list-group-item.comment-item {
+  background-color: #f9f9f9;
+}
+
+.user-signed-in-menu {
+  float: right !important;
+  margin-top: 5px;
+  margin-right: -15px
+}
+
+.user-signed-in-menu img.avatar {
+  width: 40px;
+  height: 40px;
 }
