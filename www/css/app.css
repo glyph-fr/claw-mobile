@@ -2,6 +2,14 @@ body {
   padding-top: 70px;
 }
 
+.navbar-default .navbar-toggle.btn-back {
+  width: 44px;
+  margin-left: 15px;
+  color: #999;
+  font-size: 10px;
+  text-align: center;
+}
+
 .row-link a {
   color: inherit;
 }
