@@ -232,6 +232,7 @@ App.AudioSourceController = Ember.ObjectController.extend({
       onresume: $.proxy(this.setPlaying, this),
       onpause: $.proxy(this.setPaused, this),
       onstop: $.proxy(this.setPaused, this),
+      onfinish: $.proxy(this.setPaused, this),
       whileloading: $.proxy(this.loadingFile, this),
       whileplaying: $.proxy(this.whilePlaying, this)
     });
@@ -254,6 +255,10 @@ App.AudioSourceController = Ember.ObjectController.extend({
 
   whilePlaying: function() {
     this.set('position', this.get('sound.position'));
+  },
+
+  setPosition: function(position) {
+    this.get('sound').setPosition(position);
   }
 });
 
@@ -362,22 +367,46 @@ Ember.View.reopen({
 App.AudioSourceWaveform = Ember.View.extend({
   layoutName: 'audio_source_waveform',
 
+  classNames: ['audio-source-waveform'],
+
   didInsertElement: function() {
     var width = this.$('.waveform-img-background').width();
     this.$('.waveform-img-tracker').css('width', width);
+
+    this.set('panelWidth', width);
 
     var $mask = this.$('.waveform-img-mask').css('width', '0%');
     this.set('$mask', $mask);
   },
 
   positionObserver: function() {
-    var position = this.get('controller.sound.position'),
-        duration = this.get('controller.sound.duration');
+    var position = this.get('controller.position'),
+        duration = this.get('controller.duration');
 
     console.log('position observer ...', position, duration);
 
     if(!position || !duration) return '0%';
 
     this.get('$mask').css('width', ((position / duration) * 100) + '%');
-  }.observes('controller.position', 'controller.duration')
+  }.observes('controller.position', 'controller.duration'),
+
+  touchStart: function(e) {
+    this.setPositionFromTouch(e);
+  },
+
+  touchMove: function(e) {
+    this.setPositionFromTouch(e);
+  },
+
+  setPositionFromTouch: function(e) {
+    var touch = e.originalEvent.touches[0];
+    var offsetLeft = touch.clientX - this.$().offset().left;
+    var progress = offsetLeft / this.get('panelWidth');
+
+    var duration = this.get('controller.duration');
+
+    if(!duration) return;
+
+    this.get('controller').setPosition(duration * progress);
+  }
 });

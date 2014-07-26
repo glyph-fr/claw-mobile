@@ -172,23 +172,27 @@
         <ul class="list-group">
           {{#each audio_source in audio_sources itemController="audioSource"}}
             <li class="list-group-item">
-              <div class="audio-source-header row">
-                <div class="col-xs-10 audio-source-name">
+              <div class="audio-source-header">
+                <div class="audio-source-name">
                   {{audio_source.name}}
                 </div>
+              </div>
+              <div class="audio-source-player row">
                 <div class="col-xs-2">
                   {{#if audio_source.playing}}
-                    <button class="btn btn-danger pull-right" {{action pause}}>
+                    <button class="btn btn-danger" {{action pause}}>
                       <i class="glyphicon glyphicon-pause"></i>
                     </button>
                   {{else}}
-                    <button class="btn btn-primary pull-right" {{action play}}>
+                    <button class="btn btn-primary" {{action play}}>
                       <i class="glyphicon glyphicon-play"></i>
                     </button>
                   {{/if}}
                 </div>
+                <div class="col-xs-10">
+                  {{view App.AudioSourceWaveform}}
+                </div>
               </div>
-              {{view App.AudioSourceWaveform}}
             </li>
           {{/each}}
         </ul>
@@ -248,17 +252,15 @@
     </script>
 
     <script type="text/x-handlebars" data-template-name="audio_source_waveform">
-      <div class="audio-source-waveform">
-        {{#if audio_source.waveform_url}}
-          <div class="waveform-img-mask">
-            <img {{bind-attr src=audio_source.waveform_url}} class="waveform-img waveform-img-tracker" height="40">
-          </div>
+      {{#if audio_source.waveform_url}}
+        <div class="waveform-img-mask">
+          <img {{bind-attr src=audio_source.waveform_url}} class="waveform-img waveform-img-tracker" height="40">
+        </div>
 
-          <img {{bind-attr src=audio_source.waveform_url}} class="waveform-img waveform-img-background" height="40" width="100%">
-        {{else}}
-          Pas de forme d'onde pour le moment ...
-        {{/if}}
-      </div>
+        <img {{bind-attr src=audio_source.waveform_url}} class="waveform-img waveform-img-background" height="40" width="100%">
+      {{else}}
+        Pas de forme d'onde pour le moment ...
+      {{/if}}
     </script>
 
     <script type="text/javascript" src="cordova.js"></script>
