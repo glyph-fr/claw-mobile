@@ -196,31 +196,64 @@ App.IndexController = Ember.ObjectController.extend({
 });
 
 App.AudioSourceController = Ember.ObjectController.extend({
+  sound: null,
+  playing: false,
+  trackerWidth: '0%',
+
   actions: {
     play: function() {
-      var self = this;
+      var sound;
 
-      var sound = soundManager.createSound({
-       // optional id, for getSoundById() look-ups etc. If omitted, an id will be generated.
-       id: 'audio-source-file-' + this.get('id'),
-       url: this.get('url'),
-       // optional sound parameters here, see Sound Properties for full list
-       volume: 50,
-       autoPlay: true,
-       whileloading: $.proxy(this.loadingFile, this),
-       whileplaying: $.proxy(this.playing, this)
-      });
+      if(sound = this.get('sound')) {
+        sound.play();
+      } else {
+        this.initializeSoundAndPlay();
+      }
+    },
 
-      this.set('sound', sound);
+    pause: function() {
+      var sound;
+
+      if(sound = this.get('sound')) {
+        sound.pause();
+      }
     }
   },
 
-  loadingFile: function() {
-    console.log(this.id + ' is loading', this.get('sound.bytesLoaded'), this.get('sound.bytesTotal'));
+  initializeSoundAndPlay: function() {
+    var self = this;
+
+    var sound = soundManager.createSound({
+      id: 'audio-source-file-' + this.get('id'),
+      url: this.get('url'),
+      volume: 50,
+      autoPlay: true,
+      onplay: $.proxy(this.setPlaying, this),
+      onresume: $.proxy(this.setPlaying, this),
+      onpause: $.proxy(this.setPaused, this),
+      onstop: $.proxy(this.setPaused, this),
+      whileloading: $.proxy(this.loadingFile, this),
+      whileplaying: $.proxy(this.whilePlaying, this)
+    });
+
+    this.set('sound', sound);
   },
 
-  playing: function() {
+  setPlaying: function() {
+    this.set('playing', true);
+  },
 
+  setPaused: function() {
+    this.set('playing', false);
+  },
+
+  loadingFile: function() {
+    this.set('duration', this.get('sound.duration'));
+    // console.log(this.get('sound.id') + ' is loading', this.get('sound.bytesLoaded'), this.get('sound.bytesTotal'));
+  },
+
+  whilePlaying: function() {
+    this.set('position', this.get('sound.position'));
   }
 });
 
@@ -324,4 +357,27 @@ App.Contact = Ember.Object.extend({});
 
 Ember.View.reopen({
   touchStart: Ember.aliasMethod('click')
+});
+
+App.AudioSourceWaveform = Ember.View.extend({
+  layoutName: 'audio_source_waveform',
+
+  didInsertElement: function() {
+    var width = this.$('.waveform-img-background').width();
+    this.$('.waveform-img-tracker').css('width', width);
+
+    var $mask = this.$('.waveform-img-mask').css('width', '0%');
+    this.set('$mask', $mask);
+  },
+
+  positionObserver: function() {
+    var position = this.get('controller.sound.position'),
+        duration = this.get('controller.sound.duration');
+
+    console.log('position observer ...', position, duration);
+
+    if(!position || !duration) return '0%';
+
+    this.get('$mask').css('width', ((position / duration) * 100) + '%');
+  }.observes('controller.position', 'controller.duration')
 });
