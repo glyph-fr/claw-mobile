@@ -1,13 +1,34 @@
 body {
-  padding-top: 70px;
+  padding-top: 50px;
 }
 
-.navbar-default .navbar-toggle.btn-back {
+.main-container {
+  padding: 0;
+}
+
+.panel {
+  border-radius: none;
+  border: none;
+}
+
+.panel-default > .panel-heading {
+  background-color: #ff9a9a;
+}
+
+.main-navbar .navbar-toggle.btn-back {
   width: 44px;
   margin-left: 15px;
-  color: #999;
+  color: white;
   font-size: 10px;
   text-align: center;
+}
+
+.navbar-inverse .navbar-toggle {
+  border-color: #666;
+}
+
+.navbar-toggle, .btn {
+  border-radius: 0px;
 }
 
 .row-link a {

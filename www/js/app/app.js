@@ -370,13 +370,17 @@ App.AudioSourceWaveform = Ember.View.extend({
   classNames: ['audio-source-waveform'],
 
   didInsertElement: function() {
+    this.set('$mask', this.$('.waveform-img-mask'));
+    this.get('$mask').css('width', '0%');
+
+    this.resetWidth();
+    $(window).on('resize', $.proxy(this.resetWidth, this));
+  },
+
+  resetWidth: function() {
     var width = this.$('.waveform-img-background').width();
-    this.$('.waveform-img-tracker').css('width', width);
-
     this.set('panelWidth', width);
-
-    var $mask = this.$('.waveform-img-mask').css('width', '0%');
-    this.set('$mask', $mask);
+    this.$('.waveform-img-tracker').css('width', width);
   },
 
   positionObserver: function() {
